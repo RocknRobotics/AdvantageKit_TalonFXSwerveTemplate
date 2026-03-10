@@ -8,6 +8,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -24,6 +25,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake;
+import frc.robot.subsystems.shooter;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -35,12 +38,25 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final shooter shooter = new shooter();
+  private final intake intake = new intake();
+  // private final arm armPlease = new arm();
 
   // Controller
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
+  private final CommandPS4Controller fuelMinipulator = new CommandPS4Controller(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Ramp rate limiters (acceleration)
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(3.0); // m/s^2
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
+  private SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0); // rad/s^2
+
+  double xSpeed = xLimiter.calculate(controller.getLeftX());
+  double ySpeed = yLimiter.calculate(controller.getLeftY());
+  double rot = rotLimiter.calculate(controller.getRightX());
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
