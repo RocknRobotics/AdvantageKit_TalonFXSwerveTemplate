@@ -3,12 +3,10 @@ package frc.robot.subsystems;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class arm extends SubsystemBase {
-  public SparkMax arm = new SparkMax(1, MotorType.kBrushless);
-  public PS4Controller ps4 = new PS4Controller(1);
+  public SparkMax arm = new SparkMax(15, MotorType.kBrushless);
   public RelativeEncoder encoder = arm.getEncoder();
 
   public arm() {
@@ -33,12 +31,5 @@ public class arm extends SubsystemBase {
     arm.set(0);
   }
 
-  public void periodic() {
-    if (ps4.getCircleButtonPressed()) {
-      start();
-    }
-    if (ps4.getTriangleButtonPressed()) {
-      end();
-    }
-  }
+  public void periodic() {}
 }

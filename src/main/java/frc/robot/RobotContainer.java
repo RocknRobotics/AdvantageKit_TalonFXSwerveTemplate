@@ -8,6 +8,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,6 +27,10 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+// import frc.robot.subsystems.vision.Vision;
+// import frc.robot.subsystems.vision.VisionIO;
+// import frc.robot.subsystems.vision.VisionIOLimelight;
+// import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.intake;
 import frc.robot.subsystems.shooter;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -37,10 +43,10 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  private Drive drive;
+//   private Vision vision;
   private final shooter shooter = new shooter();
   private final intake intake = new intake();
-  // private final arm armPlease = new arm();
 
   // Controller
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
@@ -90,10 +96,27 @@ public class RobotContainer {
         // new ModuleIOTalonFXS(TunerConstants.FrontRight),
         // new ModuleIOTalonFXS(TunerConstants.BackLeft),
         // new ModuleIOTalonFXS(TunerConstants.BackRight));
+        // Real robot, instantiate hardware IO implementations
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOLimelight("camera0Name", drive::getRotation),
+        //         new VisionIOLimelight("camera1Name", drive::getRotation));
+        // vision =
+        // new Vision(
+        // demoDrive::addVisionMeasurement,
+        // new VisionIOPhotonVision(camera0Name, robotToCamera0),
+        // new VisionIOPhotonVision(camera1Name, robotToCamera1));
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        // Sim robot, instantiate physics sim IO implementations
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
+        //         new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         drive =
             new Drive(
                 new GyroIO() {},
@@ -104,7 +127,9 @@ public class RobotContainer {
         break;
 
       default:
-        // Replayed robot, disable IO implementations
+         // Replayed robot, disable IO implementations
+        // (Use same number of dummy implementations as the real robot)
+       // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         drive =
             new Drive(
                 new GyroIO() {},
@@ -176,6 +201,31 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    fuelMinipulator.circle().whileTrue(intake.setSpeed(1));
+    fuelMinipulator.circle().whileFalse(intake.setSpeed(0));
+
+    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(0.75));
+    fuelMinipulator.L2().whileFalse(shooter.setShooterSpeed(0));
+
+    fuelMinipulator.L1().whileTrue(shooter.setTransition(0.6));
+    fuelMinipulator.L1().whileFalse(shooter.setTransition(0));
+
+    // Auto aim command example
+    // @SuppressWarnings("resource")
+    // PIDController aimController = new PIDController(0.2, 0.0, 0.0);
+    // aimController.enableContinuousInput(-Math.PI, Math.PI);
+    // controller
+    //     .square()
+    //     .onTrue(
+    //         Commands.startRun(
+    //             () -> {
+    //               aimController.reset();
+    //             },
+    //             () -> {
+    //               drive.run(0.0, aimController.calculate(vision.getTargetX(0).getRadians()));
+    //             },
+    //             drive));
   }
 
   /**

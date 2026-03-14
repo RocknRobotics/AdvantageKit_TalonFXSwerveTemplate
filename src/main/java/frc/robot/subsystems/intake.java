@@ -5,19 +5,19 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 
 // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class intake extends SubsystemBase {
   // public double targetY = LimelightHelpers.getTY("limelight");
   // public double targetX = LimelightHelpers.getTX("limelight");
   public double acceleration = .1;
-  public SparkFlex updownmotor1 = new SparkFlex(4, MotorType.kBrushless);
-  public SparkFlex updownmotor2 = new SparkFlex(5, MotorType.kBrushless);
-  public SparkFlex pickupmotor = new SparkFlex(6, MotorType.kBrushless);
+  public SparkFlex updownmotor1 = new SparkFlex(18, MotorType.kBrushless);
+  public SparkFlex updownmotor2 = new SparkFlex(16, MotorType.kBrushless);
+  public SparkFlex pickupmotor = new SparkFlex(17, MotorType.kBrushless);
   public double speedin = .30;
-  public CommandPS4Controller p4 = new CommandPS4Controller(1);
 
   @SuppressWarnings("removal")
   public void updateAccleration() {
@@ -80,8 +80,9 @@ public class intake extends SubsystemBase {
     updownmotor2.set(-speed);
   }
 
-  public void periodic() {
-    setDirection(p4.getLeftY());
-    pickupmotor.set(0.60);
+  public Command setSpeed(double speed) {
+    return new RunCommand(() -> pickupmotor.set(speed));
   }
+
+  public void periodic() {}
 }

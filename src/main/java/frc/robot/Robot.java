@@ -25,6 +25,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  // private shooter shooter = new shooter();
 
   public Robot() {
     // Record metadata
@@ -91,7 +92,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    // shooter.shoot(0);
+  }
 
   /** This function is called periodically when disabled. */
   @Override

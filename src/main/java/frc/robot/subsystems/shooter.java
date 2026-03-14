@@ -5,14 +5,14 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class shooter extends SubsystemBase {
   public double acceleration = .1;
-  public SparkFlex shootingMotor = new SparkFlex(2, MotorType.kBrushless);
-  public SparkFlex loadingMotor = new SparkFlex(3, MotorType.kBrushless);
-  public PS4Controller fuelManipulater = new PS4Controller(1);
+  public SparkFlex shootingMotor = new SparkFlex(19, MotorType.kBrushless);
+  public SparkFlex loadingMotor = new SparkFlex(20, MotorType.kBrushless);
 
   @SuppressWarnings("removal")
   public void update() {
@@ -52,23 +52,17 @@ public class shooter extends SubsystemBase {
     shootingMotor.set(power);
   }
 
+  public Command setShooterSpeed(double speed) {
+    return new RunCommand(() -> shootingMotor.set(speed));
+  }
+
+  public Command setTransition(double speed) {
+    return new RunCommand(() -> loadingMotor.set(speed));
+  }
+
   public double getShooterSpeed() {
     return shootingMotor.get();
   }
 
-  public void periodic() {
-    if (fuelManipulater.getSquareButtonPressed()) {
-      shoot(.15);
-    }
-
-    // Picks up ball from fuel tank at speed of right motor
-    if (fuelManipulater.getCrossButtonPressed()) {
-      load(.5);
-    }
-
-    if (fuelManipulater.getR1ButtonPressed()) {
-      load(0);
-      shoot(0);
-    }
-  }
+  public void periodic() {}
 }
