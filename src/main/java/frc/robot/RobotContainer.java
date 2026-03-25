@@ -8,18 +8,21 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-
-import edu.wpi.first.math.controller.PIDController;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.MoveIntake;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -27,12 +30,16 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake;
+import frc.robot.subsystems.shooter;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionIO;
 // import frc.robot.subsystems.vision.VisionIOLimelight;
 // import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.subsystems.intake;
-import frc.robot.subsystems.shooter;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -44,9 +51,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private Drive drive;
-//   private Vision vision;
-  private final shooter shooter = new shooter();
-  private final intake intake = new intake();
+  //   private Vision vision;
+  public static shooter shooter = new shooter();
+  public static intake intake = new intake();
 
   // Controller
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
@@ -59,6 +66,7 @@ public class RobotContainer {
   private SlewRateLimiter xLimiter = new SlewRateLimiter(3.0); // m/s^2
   private SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
   private SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0); // rad/s^2
+  private final Vision vision;
 
   double xSpeed = xLimiter.calculate(controller.getLeftX());
   double ySpeed = yLimiter.calculate(controller.getLeftY());
@@ -68,6 +76,9 @@ public class RobotContainer {
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
+
+        // new VisionIOLimelight(camera1Name, drive::getRotation));
+
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
@@ -98,17 +109,15 @@ public class RobotContainer {
         // new ModuleIOTalonFXS(TunerConstants.BackRight));
         // Real robot, instantiate hardware IO implementations
         // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOLimelight("camera0Name", drive::getRotation),
-        //         new VisionIOLimelight("camera1Name", drive::getRotation));
-        // vision =
         // new Vision(
         // demoDrive::addVisionMeasurement,
         // new VisionIOPhotonVision(camera0Name, robotToCamera0),
         // new VisionIOPhotonVision(camera1Name, robotToCamera1));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight("limelight-first", drive::getRotation));
         break;
-
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         // Sim robot, instantiate physics sim IO implementations
@@ -116,7 +125,8 @@ public class RobotContainer {
         //     new Vision(
         //         drive::addVisionMeasurement,
         //         new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-        //         new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        //
+        // new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         drive =
             new Drive(
                 new GyroIO() {},
@@ -124,12 +134,17 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim("limelight-first", new Transform3d(), drive::getPose));
+
         break;
 
       default:
-         // Replayed robot, disable IO implementations
+        // Replayed robot, disable IO implementations
         // (Use same number of dummy implementations as the real robot)
-       // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         drive =
             new Drive(
                 new GyroIO() {},
@@ -137,8 +152,42 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
         break;
     }
+
+    // Create Named Commands
+    NamedCommands.registerCommand(
+        "Reset Gyro",
+        Commands.runOnce(
+                () ->
+                    drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.k180deg)),
+                drive)
+            .ignoringDisable(true));
+    NamedCommands.registerCommand(
+        "Shoot",
+        new SequentialCommandGroup(shooter.setConvayerbelt(0.68), shooter.setTransition(0.68)));
+    NamedCommands.registerCommand("StartIntake", intake.setSpeed(1));
+    NamedCommands.registerCommand("StopIntake", intake.setSpeed(0));
+    NamedCommands.registerCommand("LowerIntake", intake.setIntakePosition(0));
+    NamedCommands.registerCommand("HigherIntake", intake.setIntakePosition(0.695));
+    NamedCommands.registerCommand("StartShooter", shooter.setShooterSpeed(0.62));
+    NamedCommands.registerCommand("Transition", shooter.setTransition(0.68));
+    NamedCommands.registerCommand("ConveyorBelt", shooter.setConvayerbelt(0.68));
+    NamedCommands.registerCommand(
+        "AutoAim",
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> drive.getAngleToHub()));
+
+    // Auto Command inits
+    PathPlannerAuto autoCommand = new PathPlannerAuto("Blue 1");
+
+    // Bind different auto triggers
+    autoCommand.isRunning().onTrue(Commands.print("Auto Started"));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -158,6 +207,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Blue 1 Fuel&Shoot", autoCommand);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -178,7 +228,7 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // Lock to 0° when A button is held
+    // Lock to Center of Hub when X button is held
     controller
         .cross()
         .whileTrue(
@@ -186,30 +236,48 @@ public class RobotContainer {
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+                () -> drive.getAngleToHub()));
 
-    // Switch to X pattern when X button is pressed
+    // Lock to semicircle around hub
+    // controller
+    //   .square()
+    // .whileTrue(
+    //   DriveCommands.joystickDriveAtAngle(
+    //        drive,
+    //        () -> -drive.getDistanceYToHub(),
+    //       () -> -drive.getDistanceXToHub(),
+    //       () -> Rotation2d.kZero));
+    // Switch to X pattern when Triangle button is pressed
     controller.triangle().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when Circle button is pressed
     controller
         .circle()
         .onTrue(
             Commands.runOnce(
                     () ->
                         drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.k180deg)),
                     drive)
                 .ignoringDisable(true));
 
+    // Intake when circle button pressed
     fuelMinipulator.circle().whileTrue(intake.setSpeed(1));
     fuelMinipulator.circle().whileFalse(intake.setSpeed(0));
 
-    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(0.75));
+    // Shooter when l2 pressed
+    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(0.62));
     fuelMinipulator.L2().whileFalse(shooter.setShooterSpeed(0));
 
-    fuelMinipulator.L1().whileTrue(shooter.setTransition(0.6));
+    // Transition when L1 pressed
+    fuelMinipulator.L1().whileTrue(shooter.setTransition(0.68));
+    fuelMinipulator.L1().whileTrue(shooter.setConvayerbelt(0.68));
     fuelMinipulator.L1().whileFalse(shooter.setTransition(0));
+    fuelMinipulator.L1().whileFalse(shooter.setConvayerbelt(0));
+    fuelMinipulator.R1().whileTrue(shooter.setTransition(-0.68));
+    fuelMinipulator.R1().whileTrue(shooter.setConvayerbelt(-0.68));
+    fuelMinipulator.R1().whileFalse(shooter.setTransition(0));
+    fuelMinipulator.R1().whileFalse(shooter.setConvayerbelt(0));
 
     // Auto aim command example
     // @SuppressWarnings("resource")
@@ -226,6 +294,7 @@ public class RobotContainer {
     //               drive.run(0.0, aimController.calculate(vision.getTargetX(0).getRadians()));
     //             },
     //             drive));
+    fuelMinipulator.R2().onTrue(new MoveIntake(.695));
   }
 
   /**

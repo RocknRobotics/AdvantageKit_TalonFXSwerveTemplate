@@ -1,10 +1,14 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,46 +17,71 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class intake extends SubsystemBase {
   // public double targetY = LimelightHelpers.getTY("limelight");
   // public double targetX = LimelightHelpers.getTX("limelight");
+  public double posi = 0;
+  public double kg = 5;
+  public double posp = 0;
+  public double posd = 0;
   public double acceleration = .1;
-  public SparkFlex updownmotor1 = new SparkFlex(18, MotorType.kBrushless);
-  public SparkFlex updownmotor2 = new SparkFlex(16, MotorType.kBrushless);
-  public SparkFlex pickupmotor = new SparkFlex(17, MotorType.kBrushless);
+  public SparkFlex intakeleft = new SparkFlex(18, MotorType.kBrushless);
+  public SparkFlex intakeright = new SparkFlex(16, MotorType.kBrushless);
+  public SparkFlex roller = new SparkFlex(17, MotorType.kBrushless);
+  public SparkClosedLoopController left;
+  public SparkClosedLoopController right;
   public double speedin = .30;
 
+  public intake() {
+    configmotors();
+  }
+
   @SuppressWarnings("removal")
-  public void updateAccleration() {
-    SparkFlexConfig config = new SparkFlexConfig();
-    config.openLoopRampRate(acceleration);
-    config.closedLoopRampRate(acceleration);
-    updownmotor1.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    updownmotor2.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    pickupmotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  public void configmotors() {
+    SparkFlexConfig configright = new SparkFlexConfig();
+    SparkFlexConfig configleft = new SparkFlexConfig();
+    SparkFlexConfig configroller = new SparkFlexConfig();
+    configleft
+        .openLoopRampRate(.3)
+        .idleMode(IdleMode.kBrake)
+        .smartCurrentLimit(40)
+        .inverted(false)
+        .closedLoopRampRate(.3)
+        .closedLoop
+        .p(posp)
+        .i(posi)
+        .d(posd)
+        .outputRange(-1, 1)
+        .feedForward
+        .kG(kg);
+    configright
+        .openLoopRampRate(.3)
+        .idleMode(IdleMode.kBrake)
+        .inverted(false)
+        .smartCurrentLimit(40)
+        .closedLoopRampRate(.3)
+        .closedLoop
+        .p(posp)
+        .i(posi)
+        .d(posd)
+        .outputRange(-1, 1)
+        .feedForward
+        .kG(kg);
+    configroller
+        .openLoopRampRate(.3)
+        .idleMode(IdleMode.kCoast)
+        .smartCurrentLimit(40)
+        .closedLoopRampRate(.3);
+    left = intakeleft.getClosedLoopController();
+    right = intakeright.getClosedLoopController();
+    intakeright.configure(
+        configright, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    intakeleft.configure(
+        configleft, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    roller.configure(configroller, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     // SmartDashboard.putNumber(null, acceleration);
   }
 
   public void updateIntakeSpeed() {
-    pickupmotor.set(speedin);
+    roller.set(speedin);
     // SmartDashboard.putNumber(null, acceleration);
-  }
-
-  public void increaseAcceleration() {
-    if (acceleration < 1) {
-      acceleration += .01;
-    }
-    if (acceleration < 0) {
-      acceleration = 0.01;
-    }
-    updateAccleration();
-  }
-
-  public void decreaseAcceleration() {
-    if (acceleration > 0) {
-      acceleration -= .01;
-    }
-    if (acceleration < 0) {
-      acceleration = 0;
-    }
-    updateAccleration();
   }
 
   public void increaseIntakeSpeed() {
@@ -75,14 +104,16 @@ public class intake extends SubsystemBase {
     updateIntakeSpeed();
   }
 
-  public void setDirection(double speed) {
-    updownmotor1.set(speed);
-    updownmotor2.set(-speed);
+  public Command setIntakePosition(double position) {
+    return new RunCommand(() -> left.setSetpoint(position, ControlType.kPosition));
   }
 
   public Command setSpeed(double speed) {
-    return new RunCommand(() -> pickupmotor.set(speed));
+    return new RunCommand(() -> roller.set(speed));
   }
 
-  public void periodic() {}
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("Intake Pivot value", intakeright.getEncoder().getPosition());
+  }
 }
