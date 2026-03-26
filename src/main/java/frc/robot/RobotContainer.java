@@ -281,19 +281,19 @@ public class RobotContainer {
     // Transition when R2 pressed
     // fuelMinipulator.R2().whileTrue(shooter.setTransition(0.68));
     // fuelMinipulator.R2().whileTrue(shooter.setConvayerbelt(-0.68));
-    // Sequential
+    // Parallel
     fuelMinipulator
         .R2()
         .whileTrue(
-            new ParallelCommandGroup(shooter.setTransition(0.68), shooter.setConvayerbelt(-0.68).withTimeout(0.5)));
+            new ParallelCommandGroup(
+                shooter.setTransition(0.68), shooter.setConvayerbelt(-0.68).withTimeout(0.5)));
 
     // fuelMinipulator.R2().whileFalse(shooter.setTransition(0));
     // fuelMinipulator.R2().whileFalse(shooter.setConvayerbelt(0));
-    // Sequential
+    // Parallel
     fuelMinipulator
         .R2()
-        .whileFalse(
-            new ParallelCommandGroup(shooter.setTransition(0), shooter.setConvayerbelt(0)));
+        .whileFalse(new ParallelCommandGroup(shooter.setTransition(0), shooter.setConvayerbelt(0)));
 
     // Raise Lower Intake
     // fuelMinipulator.L1().onTrue(new MoveIntake(30));
@@ -314,9 +314,9 @@ public class RobotContainer {
     // X Uh Oh reverse Transition and Convayerbelt
     // fuelMinipulator.cross().whileTrue(shooter.setTransition(-0.68));
     // fuelMinipulator.cross().whileTrue(shooter.setConvayerbelt(0.68));
-    // Sequential
+    // Parallel
     // fuelMinipulator.cross().whileTrue(
-    //     new SequentialCommandGroup(
+    //     new ParallelCommandGroup(
     //         shooter.setTransition(-0.68),
     //         shooter.setConvayerbelt(0.68)
     //     ));
@@ -325,7 +325,7 @@ public class RobotContainer {
     // fuelMinipulator.cross().whileFalse(shooter.setConvayerbelt(0));
     // Sequential
     // fuelMinipulator.cross().whileFalse(
-    //     new SequentialCommandGroup(
+    //     new ParallelCommandGroup(
     //         shooter.setTransition(0),
     //         shooter.setConvayerbelt(0)
     //     ));
