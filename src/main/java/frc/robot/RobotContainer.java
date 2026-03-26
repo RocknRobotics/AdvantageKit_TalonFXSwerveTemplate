@@ -8,16 +8,16 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
+// import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -32,10 +32,10 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake;
 import frc.robot.subsystems.shooter;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+// import frc.robot.subsystems.vision.Vision;
+// import frc.robot.subsystems.vision.VisionIO;
+// import frc.robot.subsystems.vision.VisionIOLimelight;
+// import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionIO;
 // import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -66,7 +66,7 @@ public class RobotContainer {
   private SlewRateLimiter xLimiter = new SlewRateLimiter(3.0); // m/s^2
   private SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
   private SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0); // rad/s^2
-  private final Vision vision;
+  //   private final Vision vision;
 
   double xSpeed = xLimiter.calculate(controller.getLeftX());
   double ySpeed = yLimiter.calculate(controller.getLeftY());
@@ -113,10 +113,10 @@ public class RobotContainer {
         // demoDrive::addVisionMeasurement,
         // new VisionIOPhotonVision(camera0Name, robotToCamera0),
         // new VisionIOPhotonVision(camera1Name, robotToCamera1));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight("limelight-first", drive::getRotation));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOLimelight("limelight-first", drive::getRotation));
         break;
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
@@ -134,10 +134,11 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim("limelight-first", new Transform3d(), drive::getPose));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVisionSim("limelight-first", new Transform3d(),
+        // drive::getPose));
 
         break;
 
@@ -152,36 +153,44 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
         break;
     }
 
-    // Create Named Commands
-    NamedCommands.registerCommand(
-        "Reset Gyro",
-        Commands.runOnce(
-                () ->
-                    drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.k180deg)),
-                drive)
-            .ignoringDisable(true));
-    NamedCommands.registerCommand(
-        "Shoot",
-        new SequentialCommandGroup(shooter.setConvayerbelt(0.68), shooter.setTransition(0.68)));
-    NamedCommands.registerCommand("StartIntake", intake.setSpeed(1));
-    NamedCommands.registerCommand("StopIntake", intake.setSpeed(0));
-    NamedCommands.registerCommand("LowerIntake", intake.setIntakePosition(0));
-    NamedCommands.registerCommand("HigherIntake", intake.setIntakePosition(0.695));
-    NamedCommands.registerCommand("StartShooter", shooter.setShooterSpeed(0.62));
-    NamedCommands.registerCommand("Transition", shooter.setTransition(0.68));
-    NamedCommands.registerCommand("ConveyorBelt", shooter.setConvayerbelt(0.68));
-    NamedCommands.registerCommand(
-        "AutoAim",
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> drive.getAngleToHub()));
+    // // Create Named Commands
+    // NamedCommands.registerCommand(
+    //     "Reset Gyro",
+    //     Commands.runOnce(
+    //             () ->
+    //                 drive.setPose(new Pose2d(drive.getPose().getTranslation(),
+    // Rotation2d.k180deg)),
+    //             drive)
+    //         .ignoringDisable(true));
+    // NamedCommands.registerCommand(
+    //     "Shoot",
+    //     new SequentialCommandGroup(shooter.setConvayerbelt(0.68), shooter.setTransition(0.68)));
+    // NamedCommands.registerCommand("StartIntake", intake.setSpeed(1));
+    // NamedCommands.registerCommand("StopIntake", intake.setSpeed(0));
+    // NamedCommands.registerCommand("LowerIntake", intake.setIntakePosition(0));
+    // NamedCommands.registerCommand("HigherIntake", intake.setIntakePosition(0.695));
+    // NamedCommands.registerCommand("StartShooter", shooter.setShooterSpeed(0.62));
+    // NamedCommands.registerCommand(
+    //     "StationaryShoot",
+    //     new SequentialCommandGroup(
+    //         shooter.setShooterSpeed(0.62),
+    //         new WaitCommand(3),
+    //         shooter.setConvayerbelt(0.68),
+    //         shooter.setTransition(0.68)));
+    // NamedCommands.registerCommand("Transition", shooter.setTransition(0.68));
+    // NamedCommands.registerCommand("ConveyorBelt", shooter.setConvayerbelt(0.68));
+    // NamedCommands.registerCommand(
+    //     "AutoAim",
+    //     DriveCommands.joystickDriveAtAngle(
+    //         drive,
+    //         () -> -controller.getLeftY(),
+    //         () -> -controller.getLeftX(),
+    //         () -> drive.getAngleToHub()));
 
     // Auto Command inits
     PathPlannerAuto autoCommand = new PathPlannerAuto("Blue 1");
@@ -262,22 +271,69 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     // Intake when circle button pressed
-    fuelMinipulator.circle().whileTrue(intake.setSpeed(1));
+    fuelMinipulator.circle().whileTrue(intake.setSpeed(-0.65));
     fuelMinipulator.circle().whileFalse(intake.setSpeed(0));
 
-    // Shooter when l2 pressed
-    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(0.62));
+    // Shooter when L2 pressed
+    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(0.75));
     fuelMinipulator.L2().whileFalse(shooter.setShooterSpeed(0));
 
-    // Transition when L1 pressed
-    fuelMinipulator.L1().whileTrue(shooter.setTransition(0.68));
-    fuelMinipulator.L1().whileTrue(shooter.setConvayerbelt(0.68));
-    fuelMinipulator.L1().whileFalse(shooter.setTransition(0));
-    fuelMinipulator.L1().whileFalse(shooter.setConvayerbelt(0));
-    fuelMinipulator.R1().whileTrue(shooter.setTransition(-0.68));
-    fuelMinipulator.R1().whileTrue(shooter.setConvayerbelt(-0.68));
-    fuelMinipulator.R1().whileFalse(shooter.setTransition(0));
-    fuelMinipulator.R1().whileFalse(shooter.setConvayerbelt(0));
+    // Transition when R2 pressed
+    // fuelMinipulator.R2().whileTrue(shooter.setTransition(0.68));
+    // fuelMinipulator.R2().whileTrue(shooter.setConvayerbelt(-0.68));
+    // Sequential
+    fuelMinipulator
+        .R2()
+        .whileTrue(
+            new ParallelCommandGroup(shooter.setTransition(0.68), shooter.setConvayerbelt(-0.68).withTimeout(0.5)));
+
+    // fuelMinipulator.R2().whileFalse(shooter.setTransition(0));
+    // fuelMinipulator.R2().whileFalse(shooter.setConvayerbelt(0));
+    // Sequential
+    fuelMinipulator
+        .R2()
+        .whileFalse(
+            new ParallelCommandGroup(shooter.setTransition(0), shooter.setConvayerbelt(0)));
+
+    // Raise Lower Intake
+    // fuelMinipulator.L1().onTrue(new MoveIntake(30));
+    // fuelMinipulator.R1().onTrue(new MoveIntake(0));
+    // fuelMinipulator.L1().onTrue(intake.setIntakePosition(30));
+    // fuelMinipulator.L1().onFalse(intake.setIntakePosition(0));
+    // fuelMinipulator.R1().onTrue(intake.setIntakePosition(0));
+
+    // Sequential command Lower Intake
+    fuelMinipulator
+        .L1()
+        .onTrue(new SequentialCommandGroup(new MoveIntake(30), intake.setIntakePosition(30)));
+    fuelMinipulator.L1().onFalse(intake.setIntakePosition(0));
+    fuelMinipulator
+        .R1()
+        .onTrue(new SequentialCommandGroup(new MoveIntake(0), intake.setIntakePosition(0)));
+
+    // X Uh Oh reverse Transition and Convayerbelt
+    // fuelMinipulator.cross().whileTrue(shooter.setTransition(-0.68));
+    // fuelMinipulator.cross().whileTrue(shooter.setConvayerbelt(0.68));
+    // Sequential
+    // fuelMinipulator.cross().whileTrue(
+    //     new SequentialCommandGroup(
+    //         shooter.setTransition(-0.68),
+    //         shooter.setConvayerbelt(0.68)
+    //     ));
+
+    // fuelMinipulator.cross().whileFalse(shooter.setTransition(0));
+    // fuelMinipulator.cross().whileFalse(shooter.setConvayerbelt(0));
+    // Sequential
+    // fuelMinipulator.cross().whileFalse(
+    //     new SequentialCommandGroup(
+    //         shooter.setTransition(0),
+    //         shooter.setConvayerbelt(0)
+    //     ));
+
+    // Square to reverse Shooter
+    // fuelMinipulator.square().whileTrue(shooter.setShooterSpeed(-0.62));
+
+    // fuelMinipulator.square().whileFalse(shooter.setShooterSpeed(0));
 
     // Auto aim command example
     // @SuppressWarnings("resource")
@@ -294,7 +350,7 @@ public class RobotContainer {
     //               drive.run(0.0, aimController.calculate(vision.getTargetX(0).getRadians()));
     //             },
     //             drive));
-    fuelMinipulator.R2().onTrue(new MoveIntake(.695));
+
   }
 
   /**
