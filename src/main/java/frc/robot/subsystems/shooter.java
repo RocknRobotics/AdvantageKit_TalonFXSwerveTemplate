@@ -5,7 +5,9 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,6 +28,12 @@ public class shooter extends SubsystemBase {
     config.openLoopRampRate(shooterAccel);
     config.closedLoopRampRate(shooterAccel);
     shootingMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    SparkMaxConfig configMax = new SparkMaxConfig();
+    configMax.openLoopRampRate(acceleration);
+    configMax.closedLoopRampRate(acceleration);
+    configMax.idleMode(IdleMode.kCoast);
+    convayerbelt.configure(
+        configMax, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   // public void increase() {
