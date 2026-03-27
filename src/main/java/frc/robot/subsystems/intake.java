@@ -57,7 +57,10 @@ public class intake extends SubsystemBase {
         .outputRange(-1, 1)
         .feedForward
         .kG(kg);
-    configleft.encoder.positionConversionFactor(PCF).velocityConversionFactor(VCF);
+    configleft
+      .encoder
+        .positionConversionFactor(PCF)
+        .velocityConversionFactor(VCF);
     // configright
     //     .openLoopRampRate(.3)
     //     .idleMode(IdleMode.kBrake)
@@ -110,15 +113,29 @@ public class intake extends SubsystemBase {
   //   }
   //   updateIntakeSpeed();
   // }
-
+  /**
+   * Moves the Intake up or down to a specified position
+   *
+   * @param position Target Position
+   */
   public Command setIntakePosition(double position) {
     return new RunCommand(() -> left.setSetpoint(position, ControlType.kPosition));
   }
 
+  /**
+   * Sets the Intake raise lower speed
+   *
+   * @param speed Target Speed
+   */
   public Command setIntakeSpeed(double speed) {
     return new RunCommand(() -> intakeleft.set(speed));
   }
 
+  /**
+   * Sets the Rollar speed to a specified amount
+   *
+   * @param speed Target Speed
+   */
   public Command setSpeed(double speed) {
     return new RunCommand(() -> roller.set(speed));
   }

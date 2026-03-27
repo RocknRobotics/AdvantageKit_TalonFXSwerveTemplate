@@ -50,11 +50,28 @@ public class RobotContainer {
   // Subsystems
   private Drive drive;
   //   private Vision vision;
+  /**
+   * Has functions to change speed of shooter, convayer and transition
+   *
+   * @see shooter#getShooterSpeed()
+   * @see shooter#setConvayerbelt(double)
+   * @see shooter#setShooterSpeed()
+   * @see shooter#setTransition(double)
+   */
   public static shooter shooter = new shooter();
+  /**
+   * Manipulates the intake of the robot, can change speed and position
+   *
+   * @see intake#setIntakePosition(double)
+   * @see intake#setIntakeSpeed(double)
+   * @see intake#setSpeed(double)
+   */
   public static intake intake = new intake();
 
   // Controller
+  /** Drive controller can lock on to hub for shooting */
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
+  /** Controller to Manipulate Subsystems: Shooter and Intake */
   private final CommandPS4Controller fuelMinipulator = new CommandPS4Controller(1);
 
   // Dashboard inputs
@@ -64,6 +81,9 @@ public class RobotContainer {
   private SlewRateLimiter xLimiter = new SlewRateLimiter(3.0); // m/s^2
   private SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
   private SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0); // rad/s^2
+  /** Lime Light Name */
+  private final String LLN = "limelight-first";
+
   private final Vision vision;
 
   double xSpeed = xLimiter.calculate(controller.getLeftX());
@@ -119,9 +139,7 @@ public class RobotContainer {
         // new VisionIOPhotonVision(camera0Name, robotToCamera0),
         // new VisionIOPhotonVision(camera1Name, robotToCamera1));
         vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight("limelight-first", drive::getRotation));
+            new Vision(drive::addVisionMeasurement, new VisionIOLimelight(LLN, drive::getRotation));
         break;
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
@@ -142,7 +160,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim("limelight-first", new Transform3d(), drive::getPose));
+                new VisionIOPhotonVisionSim(LLN, new Transform3d(), drive::getPose));
 
         break;
 
@@ -316,7 +334,10 @@ public class RobotContainer {
     // Parallel
     fuelMinipulator
         .R2()
-        .whileFalse(new ParallelCommandGroup(shooter.setTransition(0), shooter.setConvayerbelt(0)));
+        .whileFalse(
+            new ParallelCommandGroup(
+                shooter.setTransition(0), 
+                shooter.setConvayerbelt(0)));
 
     // Raise Lower Intake
     // fuelMinipulator.L1().onTrue(new MoveIntake(intakePosition));
@@ -330,11 +351,15 @@ public class RobotContainer {
         .L1()
         .onTrue(
             new SequentialCommandGroup(
-                new MoveIntake(intakePosition), intake.setIntakePosition(intakePosition)));
+                new MoveIntake(intakePosition), 
+                intake.setIntakePosition(intakePosition)));
     fuelMinipulator.L1().onFalse(intake.setIntakePosition(0));
     fuelMinipulator
         .R1()
-        .onTrue(new SequentialCommandGroup(new MoveIntake(0), intake.setIntakePosition(0)));
+        .onTrue(
+            new SequentialCommandGroup(
+                new MoveIntake(0), 
+                intake.setIntakePosition(0)));
 
     // X Uh Oh reverse Transition and Convayerbelt
     // fuelMinipulator.cross().whileTrue(shooter.setTransition(-transitionSpeed));
