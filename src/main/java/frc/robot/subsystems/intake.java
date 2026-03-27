@@ -23,6 +23,10 @@ public class intake extends SubsystemBase {
   public double kg = .5;
   public double posp = 0;
   public double posd = 0;
+  // Postion Conversion Factor
+  private final double PCF = 360.0 / 108.0;
+  // Velocity Conversion Factor
+  private final double VCF = PCF / 60.0;
   public double acceleration = .1;
   public SparkFlex intakeleft = new SparkFlex(18, MotorType.kBrushless);
   // public SparkFlex intakeright = new SparkFlex(16, MotorType.kBrushless);
@@ -53,6 +57,10 @@ public class intake extends SubsystemBase {
         .outputRange(-1, 1)
         .feedForward
         .kG(kg);
+    configleft
+      .encoder
+        .positionConversionFactor(PCF)
+        .velocityConversionFactor(VCF);
     // configright
     //     .openLoopRampRate(.3)
     //     .idleMode(IdleMode.kBrake)
@@ -71,13 +79,13 @@ public class intake extends SubsystemBase {
         .idleMode(IdleMode.kCoast)
         .smartCurrentLimit(80)
         .closedLoopRampRate(.3);
-    left = intakeleft.getClosedLoopController();
     // right = intakeright.getClosedLoopController();
     // intakeright.configure(
     //     configright, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     intakeleft.configure(
         configleft, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     roller.configure(configroller, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    left = intakeleft.getClosedLoopController();
     // SmartDashboard.putNumber(null, acceleration);
   }
 
