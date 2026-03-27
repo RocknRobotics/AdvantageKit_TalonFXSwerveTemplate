@@ -57,10 +57,7 @@ public class intake extends SubsystemBase {
         .outputRange(-1, 1)
         .feedForward
         .kG(kg);
-    configleft
-      .encoder
-        .positionConversionFactor(PCF)
-        .velocityConversionFactor(VCF);
+    configleft.encoder.positionConversionFactor(PCF).velocityConversionFactor(VCF);
     // configright
     //     .openLoopRampRate(.3)
     //     .idleMode(IdleMode.kBrake)
@@ -123,7 +120,7 @@ public class intake extends SubsystemBase {
   }
 
   /**
-   * Sets the Intake raise lower speed
+   * Sets the Intake raise/lower speed
    *
    * @param speed Target Speed
    */
