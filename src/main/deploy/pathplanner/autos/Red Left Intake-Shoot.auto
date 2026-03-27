@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue Left Intake-Mid-Shoot"
+            "pathName": "Red Left Intake-Shoot"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Red",
   "choreoAuto": false
 }
