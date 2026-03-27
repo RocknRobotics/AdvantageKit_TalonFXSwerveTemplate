@@ -74,6 +74,13 @@ public class RobotContainer {
   double ySpeed = yLimiter.calculate(controller.getLeftY());
   double rot = rotLimiter.calculate(controller.getRightX());
 
+  // Constants for different functions (speed, position)
+  private final double intakeSpeed = -0.65;
+  private final double shooterSpeed = 0.75;
+  private final double convayerSpeed = -0.68;
+  private final double transitionSpeed = 0.68;
+  private final double intakePosition = 30.0;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -172,10 +179,10 @@ public class RobotContainer {
     // NamedCommands.registerCommand(
     //     "Shoot",
     //     new ParallelCommandGroup(
-    //         shooter.setConvayerbelt(0.68),
-    //         shooter.setTransition(0.68)
+    //         shooter.setConvayerbelt(convayerSpeed),
+    //         shooter.setTransition(transitionSpeed)
     //         ));
-    // NamedCommands.registerCommand("StartIntake", intake.setSpeed(1));
+    // NamedCommands.registerCommand("StartIntake", intake.setSpeed(intakeSpeed));
     // NamedCommands.registerCommand("StopIntake", intake.setSpeed(0));
     // NamedCommands.registerCommand("LowerIntake",
     //     new SequentialCommandGroup
@@ -184,23 +191,23 @@ public class RobotContainer {
     //         ));
     // NamedCommands.registerCommand("RaiseIntake",
     //    new ParallelCommandGroup(
-    //        shooter.setTransition(0.68),
-    //        shooter.setConvayerbelt(-0.68).withTimeout(0.5)
+    //        new MoveIntake(intakePosition),
+    //        intake.setIntakePosition(intakePosition)
     //        ));
-    // NamedCommands.registerCommand("StartShooter", shooter.setShooterSpeed(0.62));
+    // NamedCommands.registerCommand("StartShooter", shooter.setShooterSpeed(shooterSpeed));
     // NamedCommands.registerCommand(
     //     "StationaryShoot",
     //     new SequentialCommandGroup(
-    //         shooter.setShooterSpeed(0.62),
+    //         shooter.setShooterSpeed(shooterSpeed),
     //         new WaitCommand(3),
     //         new ParallelCommandGroup(
-    //             shooter.setConvayerbelt(0.68),
-    //             shooter.setTransition(0.68)
+    //             shooter.setConvayerbelt(convayerSpeed),
+    //             shooter.setTransition(transitionSpeed)
     //         )
     //     ));
 
-    // NamedCommands.registerCommand("Transition", shooter.setTransition(0.68));
-    // NamedCommands.registerCommand("ConveyorBelt", shooter.setConvayerbelt(0.68));
+    // NamedCommands.registerCommand("Transition", shooter.setTransition(transitionSpeed));
+    // NamedCommands.registerCommand("ConveyorBelt", shooter.setConvayerbelt(convayerSpeed));
     // NamedCommands.registerCommand(
     //     "AutoAim",
     //     DriveCommands.joystickDriveAtAngle(
@@ -288,11 +295,11 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     // Intake when circle button pressed
-    fuelMinipulator.circle().whileTrue(intake.setSpeed(-0.65));
+    fuelMinipulator.circle().whileTrue(intake.setSpeed(intakeSpeed));
     fuelMinipulator.circle().whileFalse(intake.setSpeed(0));
 
     // Shooter when L2 pressed
-    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(0.75));
+    fuelMinipulator.L2().whileTrue(shooter.setShooterSpeed(shooterSpeed));
     fuelMinipulator.L2().whileFalse(shooter.setShooterSpeed(0));
 
     // Transition when R2 pressed
@@ -303,9 +310,8 @@ public class RobotContainer {
         .R2()
         .whileTrue(
             new ParallelCommandGroup(
-                shooter.setTransition(0.68), 
-                shooter.setConvayerbelt(-0.68).withTimeout(0.5)
-                ));
+                shooter.setTransition(transitionSpeed),
+                shooter.setConvayerbelt(convayerSpeed).withTimeout(0.5)));
 
     // fuelMinipulator.R2().whileFalse(shooter.setTransition(0));
     // fuelMinipulator.R2().whileFalse(shooter.setConvayerbelt(0));
@@ -319,9 +325,9 @@ public class RobotContainer {
                 ));
 
     // Raise Lower Intake
-    // fuelMinipulator.L1().onTrue(new MoveIntake(30));
+    // fuelMinipulator.L1().onTrue(new MoveIntake(intakePosition));
     // fuelMinipulator.R1().onTrue(new MoveIntake(0));
-    // fuelMinipulator.L1().onTrue(intake.setIntakePosition(30));
+    // fuelMinipulator.L1().onTrue(intake.setIntakePosition(intakePosition));
     // fuelMinipulator.L1().onFalse(intake.setIntakePosition(0));
     // fuelMinipulator.R1().onTrue(intake.setIntakePosition(0));
 
@@ -330,8 +336,8 @@ public class RobotContainer {
         .L1()
         .onTrue(
             new SequentialCommandGroup(
-                new MoveIntake(30), 
-                intake.setIntakePosition(30)
+                new MoveIntake(intakePosition), 
+                intake.setIntakePosition(intakePosition)
                 ));
     fuelMinipulator.L1().onFalse(intake.setIntakePosition(0));
     fuelMinipulator
@@ -343,13 +349,13 @@ public class RobotContainer {
                 ));
 
     // X Uh Oh reverse Transition and Convayerbelt
-    // fuelMinipulator.cross().whileTrue(shooter.setTransition(-0.68));
-    // fuelMinipulator.cross().whileTrue(shooter.setConvayerbelt(0.68));
+    // fuelMinipulator.cross().whileTrue(shooter.setTransition(-transitionSpeed));
+    // fuelMinipulator.cross().whileTrue(shooter.setConvayerbelt(-convayerSpeed));
     // Parallel
     // fuelMinipulator.cross().whileTrue(
     //     new ParallelCommandGroup(
-    //         shooter.setTransition(-0.68),
-    //         shooter.setConvayerbelt(0.68)
+    //         shooter.setTransition(-transtionSpeed),
+    //         shooter.setConvayerbelt(-convayerSpeed)
     //     ));
 
     // fuelMinipulator.cross().whileFalse(shooter.setTransition(0));
@@ -362,7 +368,7 @@ public class RobotContainer {
     //     ));
 
     // Square to reverse Shooter
-    // fuelMinipulator.square().whileTrue(shooter.setShooterSpeed(-0.62));
+    // fuelMinipulator.square().whileTrue(shooter.setShooterSpeed(-shooterSpeed));
 
     // fuelMinipulator.square().whileFalse(shooter.setShooterSpeed(0));
 
