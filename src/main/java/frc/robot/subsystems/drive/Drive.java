@@ -338,6 +338,7 @@ public class Drive extends SubsystemBase {
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
+  /** Rotates the robot to point towards the hub for aiming */
   public Rotation2d getAngleToHub() {
     Alliance alliance = DriverStation.getAlliance().get();
     Pose3d hubCenter = new Pose3d();

@@ -138,12 +138,6 @@
       "command": null
     },
     {
-      "name": "AutoAim",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
       "name": "StartIntake",
       "waypointRelativePos": 2.2885572139303485,
       "endWaypointRelativePos": null,
