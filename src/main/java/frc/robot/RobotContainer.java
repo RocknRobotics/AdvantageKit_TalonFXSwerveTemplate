@@ -350,10 +350,14 @@ public class RobotContainer {
     // fuelMinipulator.R1().onTrue(intake.setIntakePosition(0));
 
     // Sequential command Lower Intake
-    // fuelMinipulator.L1().whileTrue(intake.setIntakeSpeed(0.5));
+    fuelMinipulator.L1().whileTrue(intake.setIntakeSpeed(0.5));
     // // fuelMinipulator.L1().onFalse(intake.setIntakeSpeed(0));
-    // fuelMinipulator.R1().whileTrue(intake.setIntakeSpeed(-0.5));
-    // fuelMinipulator.R1().and(fuelMinipulator.L1()).whileFalse(intake.setIntakeSpeed(0));
+    fuelMinipulator.R1().whileTrue(intake.setIntakeSpeed(-0.5));
+    fuelMinipulator
+        .R1()
+        .negate()
+        .and(fuelMinipulator.L1().negate())
+        .whileTrue(intake.setIntakeSpeed(0));
     // fuelMinipulator.R1().onFalse(intake.setIntakeSpeed(0));
 
     // X Uh Oh reverse Transition and Convayerbelt
