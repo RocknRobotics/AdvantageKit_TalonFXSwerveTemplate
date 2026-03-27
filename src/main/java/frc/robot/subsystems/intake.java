@@ -23,7 +23,7 @@ public class intake extends SubsystemBase {
   public double kg = .5;
   public double posp = 0;
   public double posd = 0;
-  // Postion Conversion Factor
+  // Postion Conversion Factor: 360 / GearRatio
   private final double PCF = 360.0 / 108.0;
   // Velocity Conversion Factor
   private final double VCF = PCF / 60.0;
@@ -57,10 +57,7 @@ public class intake extends SubsystemBase {
         .outputRange(-1, 1)
         .feedForward
         .kG(kg);
-    configleft
-      .encoder
-        .positionConversionFactor(PCF)
-        .velocityConversionFactor(VCF);
+    configleft.encoder.positionConversionFactor(PCF).velocityConversionFactor(VCF);
     // configright
     //     .openLoopRampRate(.3)
     //     .idleMode(IdleMode.kBrake)

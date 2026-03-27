@@ -13,7 +13,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-// import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,14 +34,10 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake;
 import frc.robot.subsystems.shooter;
-// import frc.robot.subsystems.vision.Vision;
-// import frc.robot.subsystems.vision.VisionIO;
-// import frc.robot.subsystems.vision.VisionIOLimelight;
-// import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-// import frc.robot.subsystems.vision.Vision;
-// import frc.robot.subsystems.vision.VisionIO;
-// import frc.robot.subsystems.vision.VisionIOLimelight;
-// import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -68,7 +64,7 @@ public class RobotContainer {
   private SlewRateLimiter xLimiter = new SlewRateLimiter(3.0); // m/s^2
   private SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
   private SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0); // rad/s^2
-  //   private final Vision vision;
+  private final Vision vision;
 
   double xSpeed = xLimiter.calculate(controller.getLeftX());
   double ySpeed = yLimiter.calculate(controller.getLeftY());
@@ -122,10 +118,10 @@ public class RobotContainer {
         // demoDrive::addVisionMeasurement,
         // new VisionIOPhotonVision(camera0Name, robotToCamera0),
         // new VisionIOPhotonVision(camera1Name, robotToCamera1));
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOLimelight("limelight-first", drive::getRotation));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight("limelight-first", drive::getRotation));
         break;
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
@@ -134,7 +130,7 @@ public class RobotContainer {
         //     new Vision(
         //         drive::addVisionMeasurement,
         //         new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-        //
+
         // new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         drive =
             new Drive(
@@ -143,11 +139,10 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOPhotonVisionSim("limelight-first", new Transform3d(),
-        // drive::getPose));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim("limelight-first", new Transform3d(), drive::getPose));
 
         break;
 
@@ -162,7 +157,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
         break;
     }
@@ -217,7 +212,10 @@ public class RobotContainer {
     //         () -> drive.getAngleToHub()));
 
     // Auto Command inits
-    PathPlannerAuto autoCommand = new PathPlannerAuto("Blue 1");
+    // all / are options mix and match based on position to do what you want
+    // Left/Middle/Right refer to where the robot is relative to the side of the field you are on
+    // Available: Blue/Red Left/Middle/Right Shoot/Intake-Shoot
+    PathPlannerAuto autoCommand = new PathPlannerAuto("Blue Left Intake-Shoot");
 
     // Bind different auto triggers
     autoCommand.isRunning().onTrue(Commands.print("Auto Started"));
@@ -318,11 +316,7 @@ public class RobotContainer {
     // Parallel
     fuelMinipulator
         .R2()
-        .whileFalse(
-            new ParallelCommandGroup(
-                shooter.setTransition(0), 
-                shooter.setConvayerbelt(0)
-                ));
+        .whileFalse(new ParallelCommandGroup(shooter.setTransition(0), shooter.setConvayerbelt(0)));
 
     // Raise Lower Intake
     // fuelMinipulator.L1().onTrue(new MoveIntake(intakePosition));
@@ -336,17 +330,11 @@ public class RobotContainer {
         .L1()
         .onTrue(
             new SequentialCommandGroup(
-                new MoveIntake(intakePosition), 
-                intake.setIntakePosition(intakePosition)
-                ));
+                new MoveIntake(intakePosition), intake.setIntakePosition(intakePosition)));
     fuelMinipulator.L1().onFalse(intake.setIntakePosition(0));
     fuelMinipulator
         .R1()
-        .onTrue(
-            new SequentialCommandGroup(
-                new MoveIntake(0), 
-                intake.setIntakePosition(0)
-                ));
+        .onTrue(new SequentialCommandGroup(new MoveIntake(0), intake.setIntakePosition(0)));
 
     // X Uh Oh reverse Transition and Convayerbelt
     // fuelMinipulator.cross().whileTrue(shooter.setTransition(-transitionSpeed));
