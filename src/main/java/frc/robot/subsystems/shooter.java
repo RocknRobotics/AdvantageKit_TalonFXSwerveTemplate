@@ -69,12 +69,24 @@ public class shooter extends SubsystemBase {
     return new RunCommand(() -> shootingMotor.set(speed));
   }
 
+  public Command setShooterStop() {
+    return new RunCommand(() -> shootingMotor.stopMotor());
+  }
+
   public Command setTransition(double speed) {
     return new RunCommand(() -> loadingMotor.set(speed));
   }
 
+  public Command setTransitionStop() {
+    return new RunCommand(() -> loadingMotor.stopMotor());
+  }
+
   public Command setConvayerbelt(double speed) {
     return new RunCommand(() -> convayerbelt.set(-speed));
+  }
+
+  public Command setConvayerbeltStop() {
+    return new RunCommand(() -> convayerbelt.stopMotor());
   }
 
   public double getShooterSpeed() {

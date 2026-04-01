@@ -9,6 +9,18 @@
           "data": {
             "pathName": "Blue Right Shoot"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartShooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
         }
       ]
     }

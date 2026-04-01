@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 14.432948717948719,
-        "y": 4.05825641025641
+        "x": 12.987815344603378,
+        "y": 4.099869960988297
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.682948717948719,
-        "y": 4.05825641025641
+        "x": 13.237815344603378,
+        "y": 4.099869960988297
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 14.432948717948719,
-        "y": 4.05825641025641
+        "x": 14.226241872561765,
+        "y": 4.099869960988297
       },
       "prevControl": {
-        "x": 14.182948717948719,
-        "y": 4.05825641025641
+        "x": 13.976241872561765,
+        "y": 4.099869960988297
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,10 +33,37 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "StationaryShoot",
+      "name": "LowerIntake",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "LowerIntake"
+        }
+      }
+    },
+    {
+      "name": "StartShooter",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "StartShooter"
+        }
+      }
+    },
+    {
+      "name": "StopLowerIntake",
+      "waypointRelativePos": 0.3558558558558559,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "StopLowerIntake"
+        }
+      }
     }
   ],
   "globalConstraints": {

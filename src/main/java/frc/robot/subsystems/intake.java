@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -8,7 +9,8 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,11 +20,15 @@ public class intake extends SubsystemBase {
   // public double targetY = LimelightHelpers.getTY("limelight");
   // public double targetX = LimelightHelpers.getTX("limelight");
 
-  private PS4Controller fuelMinipulater = new PS4Controller(1);
+  // private PS4Controller fuelMinipulater = new PS4Controller(1);
   public double posi = 0;
   public double kg = .5;
   public double posp = 0;
   public double posd = 0;
+  static final double COUNTS_PER_MOTOR_REV = 288;
+  static final double GEAR_REDUCTION = 2.7778;
+  static final double COUNTS_PER_GEAR_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION;
+  static final double COUNTS_PER_DEGREE = COUNTS_PER_GEAR_REV / 360;
   // Postion Conversion Factor: 360 / GearRatio
   private final double PCF = 360.0 / 108.0;
   // Velocity Conversion Factor
@@ -31,9 +37,13 @@ public class intake extends SubsystemBase {
   public SparkFlex intakeleft = new SparkFlex(18, MotorType.kBrushless);
   // public SparkFlex intakeright = new SparkFlex(16, MotorType.kBrushless);
   public SparkFlex roller = new SparkFlex(17, MotorType.kBrushless);
+  private RelativeEncoder intakeArmEncoder = intakeleft.getEncoder();
+
   public SparkClosedLoopController left;
   // public SparkClosedLoopController right;
   public double speedin = .30;
+
+  // private double targetPosition = 60.0;
 
   public intake() {
     configmotors();
@@ -87,7 +97,7 @@ public class intake extends SubsystemBase {
   }
 
   public void updateIntakeSpeed() {
-    roller.set(speedin);
+    // roller.set(speedin);
     // SmartDashboard.putNumber(null, acceleration);
   }
 
@@ -115,6 +125,11 @@ public class intake extends SubsystemBase {
    *
    * @param position Target Position
    */
+  // look at tommarow
+  // public Command Up()
+  // {
+  //  return new RunCommand(()->intakeleft.set(.4));
+  // }
   public Command setIntakePosition(double position) {
     return new RunCommand(() -> left.setSetpoint(position, ControlType.kPosition));
   }
@@ -125,7 +140,18 @@ public class intake extends SubsystemBase {
    * @param speed Target Speed
    */
   public Command setIntakeSpeed(double speed) {
+    // if (intakeArmEncoder.getPosition() > 0 && speed > 0) {
+    //   return new RunCommand(() -> intakeleft.set(speed));
+    // } else if (intakeArmEncoder.getPosition() < 30 && speed < 0) {
+    //   return new RunCommand(() -> intakeleft.set(speed));
+    // } else {
+    //   return new RunCommand(() -> intakeleft.stopMotor());
+    // }
     return new RunCommand(() -> intakeleft.set(speed));
+  }
+
+  public Command setIntakeStop() {
+    return new RunCommand(() -> intakeleft.stopMotor());
   }
 
   /**
@@ -137,9 +163,21 @@ public class intake extends SubsystemBase {
     return new RunCommand(() -> roller.set(speed));
   }
 
+  public Command setRollerStop() {
+    return new RunCommand(() -> roller.stopMotor());
+  }
+
+  // public void changePosition() {
+  //   targetPosition = targetPosition == 60.0 ? 0.0 : 60.0;
+  // }
+
   @Override
   public void periodic() {
-    // SmartDashboard.putNumber("Intake Pivot value", intakeleft.getEncoder().getPosition());
-    intakeleft.set(fuelMinipulater.getLeftY() / 3.0);
+    // left.setSetpoint(targetPosition, ControlType.kPosition);
+    // if (intakeleft.getEncoder().getPosition() <= 0 || intakeleft.getEncoder().getPosition() >=
+    // 60)
+    //   setIntakeStop();
+    SmartDashboard.putNumber("Intake Pivot value", intakeleft.getEncoder().getPosition());
+    // intakeleft.set(fuelMinipulater.getLeftY() / 3.0);
   }
 }

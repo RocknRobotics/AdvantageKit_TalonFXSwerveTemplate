@@ -9,6 +9,18 @@
           "data": {
             "pathName": "Red Middle Intake-Shoot"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartShooter"
+          }
         }
       ]
     }
